@@ -2,12 +2,8 @@
 using gip.core.reporthandler.Flowdoc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Documents;
-using System.Windows;
 using BinaryKits.Zpl.Label;
 using BinaryKits.Zpl.Label.Elements;
 using gip.core.autocomponent;
