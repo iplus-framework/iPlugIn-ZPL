@@ -1,5 +1,4 @@
 ﻿using gip.core.datamodel;
-using gip.core.reporthandler.Flowdoc;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -9,12 +8,14 @@ using BinaryKits.Zpl.Label.Elements;
 using gip.core.autocomponent;
 using System.Net.Sockets;
 using System.IO;
+using gip.core.reporthandlerwpf;
 using gip.core.reporthandler;
+using gip.core.reporthandlerwpf.Flowdoc;
 
 namespace zpl.core.reporthandlerwpf
 {
     [ACClassInfo(Const.PackName_VarioSystem, "en{'ZPLPrinter'}de{'ZPLPrinter'}", Global.ACKinds.TPABGModule, Global.ACStorableTypes.Required, false, false)]
-    public class ZPLPrinter : ACPrintServerBase
+    public class ZPLPrinter : ACPrintServerBaseWPF
     {
         #region c'tors
 

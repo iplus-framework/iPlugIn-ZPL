@@ -1,10 +1,10 @@
 ﻿using BinaryKits.Zpl.Label.Elements;
-using gip.core.reporthandler;
+using gip.core.reporthandlerwpf;
 using System.Collections.Generic;
 
 namespace zpl.core.reporthandlerwpf
 {
-    public class ZPLPrintJob : PrintJob
+    public class ZPLPrintJob : PrintJobWPF
     {
         public ZPLPrintJob() : base()
         {
