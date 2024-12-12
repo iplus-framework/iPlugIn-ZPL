@@ -1,2 +1,1 @@
-# iPlugIn-ZPL
-iPlugIn-ZPL  Zebra ZPL implementation
+## iPlugIn-ZPL.git
