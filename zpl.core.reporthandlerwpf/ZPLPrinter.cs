@@ -335,11 +335,16 @@ namespace zpl.core.reporthandlerwpf
 
         public override void OnRenderRun(PrintJob printJob, Run run)
         {
+            Paragraph parentParagraph = run.Parent as Paragraph;
+            int leftPadding = 10;
+            if (parentParagraph != null && parentParagraph.Padding.Left > 0)
+                leftPadding = (int)parentParagraph.Padding.Left;
+
             ZPLPrintJob zplPrintJob = printJob as ZPLPrintJob;
             if (zplPrintJob != null)
             {
                 ZplFont font = new ZplFont(0, (int)run.FontSize);
-                ZplTextField textField = new ZplTextField(run.Text, 10, zplPrintJob.NextYPosition, font);
+                ZplTextField textField = new ZplTextField(run.Text, leftPadding, zplPrintJob.NextYPosition, font);
                 zplPrintJob.AddToJob(textField, font.FontHeight);
             }
         }
