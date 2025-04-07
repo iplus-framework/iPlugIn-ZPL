@@ -147,7 +147,7 @@ namespace zpl.core.reporthandlerwpf
             {
                 ZPLPrinterAlarm.ValueT = PANotifyState.AlarmOrFault;
                 if (IsAlarmActive(nameof(ZPLPrinterAlarm), e.Message) == null)
-                    Messages.LogException(GetACUrl(), $"{nameof(LP4Printer)}.{nameof(SendData)}(10)", e);
+                    Messages.LogException(GetACUrl(), $"{nameof(ZPLPrinter)}.{nameof(SendData)}(10)", e);
 
                 OnNewAlarmOccurred(ZPLPrinterAlarm, e.Message, true);
             }
