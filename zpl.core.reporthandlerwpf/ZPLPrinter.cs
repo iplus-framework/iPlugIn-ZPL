@@ -62,6 +62,14 @@ namespace zpl.core.reporthandlerwpf
         [ACPropertyBindingSource(9999, "Error", "en{'ZPL printer alarm'}de{'ZPL Drucker Alarm'}", "", false, false)]
         public IACContainerTNet<PANotifyState> ZPLPrinterAlarm { get; set; }
 
+        [ACPropertyBindingSource(9999, "Error", "en{'Printer configuration'}de{'Drucker Konfiguration'}", "", false, true)]
+        public IACContainerTNet<string> ZPLPrinterConfiguration
+        {
+            get;
+            set;
+        }
+
+
         #endregion
 
         #region Methods 
@@ -116,6 +124,19 @@ namespace zpl.core.reporthandlerwpf
             }
             return false;
         }
+
+        public override void SendDataBeforePrint(PrintJob printJob)
+        {
+            if (ZPLPrinterConfiguration != null)
+            {
+                string printerConfiguration = ZPLPrinterConfiguration.ValueT;
+                if (!string.IsNullOrEmpty(printerConfiguration))
+                {
+                    SendData(printerConfiguration);
+                }
+            }
+        }
+
 
         public void SendData(string printCommand)
         {
@@ -336,15 +357,26 @@ namespace zpl.core.reporthandlerwpf
         public override void OnRenderRun(PrintJob printJob, Run run)
         {
             Paragraph parentParagraph = run.Parent as Paragraph;
-            int leftPadding = 10;
-            if (parentParagraph != null && parentParagraph.Padding.Left > 0)
-                leftPadding = (int)parentParagraph.Padding.Left;
+            int leftPos = 10;
+            int? topPos = null; 
+            if (parentParagraph != null)
+            {
+                if (parentParagraph.Padding.Left > 0)
+                    leftPos = (int)parentParagraph.Padding.Left;
+
+                if (parentParagraph.Padding.Top > 0)
+                    topPos = (int)parentParagraph.Padding.Top;
+            }
 
             ZPLPrintJob zplPrintJob = printJob as ZPLPrintJob;
             if (zplPrintJob != null)
             {
+                int yPos = zplPrintJob.NextYPosition;
+                if (topPos.HasValue)
+                    yPos = topPos.Value;
+
                 ZplFont font = new ZplFont(0, (int)run.FontSize);
-                ZplTextField textField = new ZplTextField(run.Text, leftPadding, zplPrintJob.NextYPosition, font);
+                ZplTextField textField = new ZplTextField(run.Text, leftPos, yPos, font);
                 zplPrintJob.AddToJob(textField, font.FontHeight);
             }
         }
@@ -378,6 +410,48 @@ namespace zpl.core.reporthandlerwpf
 
 
         #endregion
+
+        [ACMethodInteraction("", "en{'Switch to ZPL mode'}de{'Switch to ZPL mode'}", 500, true, ContextMenuCategoryIndex = (short)Global.ContextMenuCategory.Utilities)]
+        public void SwitchPrinterToZPLMode()
+        {
+            string command = "! U1 setvar \"device.languages\" \"zpl\"" +
+                             "! U1 setvar \"device.pnp_option\" \"zpl\"" +
+                             "! U1 do \"device.reset\" \"\" <CR>";
+
+            SendData(command);
+
+        }
+
+        [ACMethodInteraction("", "en{'Switch to CPCL mode'}de{'Switch to CPCL mode'}", 501, true, ContextMenuCategoryIndex = (short)Global.ContextMenuCategory.Utilities)]
+        public void SwitchPrinterToCPCLMode()
+        {
+            string command = "! U1 setvar \"device.languages\" \"line_print\"" +
+                             "! U1 setvar \"device.pnp_option\" \"cpcl\"" +
+                             "! U1 do \"device.reset\" \"\" <CR>";
+
+            SendData(command);
+        }
+
+        #endregion
+
+        #region HandleExecuteHelpers
+
+        protected override bool HandleExecuteACMethod(out object result, AsyncMethodInvocationMode invocationMode, string acMethodName, ACClassMethod acClassMethod, params object[] acParameter)
+        {
+            result = null;
+
+            switch(acMethodName)
+            {
+                case nameof(SwitchPrinterToZPLMode):
+                    SwitchPrinterToZPLMode();
+                    return true;
+                case nameof(SwitchPrinterToCPCLMode):
+                    SwitchPrinterToCPCLMode();
+                    return true;
+            }
+
+            return base.HandleExecuteACMethod(out result, invocationMode, acMethodName, acClassMethod, acParameter);
+        }
 
         #endregion
     }
