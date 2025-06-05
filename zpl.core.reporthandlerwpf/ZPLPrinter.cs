@@ -24,6 +24,13 @@ namespace zpl.core.reporthandlerwpf
             _PrintDPI = new ACPropertyConfigValue<short>(this, nameof(PrintDPI), 203);
         }
 
+        public override bool ACInit(Global.ACStartTypes startChildMode = Global.ACStartTypes.Automatic)
+        {
+            bool init = base.ACInit(startChildMode);
+            _ = PrintDPI;
+            return init;
+        }
+
         #endregion
 
         #region Properties
