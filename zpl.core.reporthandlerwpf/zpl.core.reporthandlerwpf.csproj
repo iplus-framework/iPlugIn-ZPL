@@ -1,16 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\iPlus\Directory.Build.props" />
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>$(UITargetFramework)</TargetFramework>
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <IPlusIncludeDir>..\..\iPlusMES\bin\Debug\net8.0</IPlusIncludeDir>
+    <IPlusIncludeDir>..\..\iPlusMES\bin\Debug\$(UITargetFramework)</IPlusIncludeDir>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <IPlusIncludeDir>..\..\iPlusMES\bin\Release\net8.0</IPlusIncludeDir>
+    <IPlusIncludeDir>..\..\iPlusMES\bin\Release\$(UITargetFramework)</IPlusIncludeDir>
   </PropertyGroup>
   <ItemGroup>
     <None Update="VBControlScripts\2024-12-11 14-39_ihrastinski.zip">
@@ -20,14 +21,14 @@
   <ItemGroup>
     <PackageReference Include="BinaryKits.Zpl.Label" Version="3.2.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.6.0-preview3.19128.7" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="gip.core.autocomponent">
       <HintPath>$(IPlusIncludeDir)\gip.core.autocomponent.dll</HintPath>
     </Reference>
     <Reference Include="gip.core.reporthandlerwpf">
-      <HintPath>$(IPlusIncludeDir)-windows\gip.core.reporthandlerwpf.dll</HintPath>
+      <HintPath>$(IPlusIncludeDir)\gip.core.reporthandlerwpf.dll</HintPath>
     </Reference>
 	<Reference Include="gip.core.reporthandlerwpf">
       <HintPath>$(IPlusIncludeDir)\gip.core.reporthandler.dll</HintPath>
