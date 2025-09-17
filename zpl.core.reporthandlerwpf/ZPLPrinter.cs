@@ -22,6 +22,8 @@ namespace zpl.core.reporthandlerwpf
             base(acType, content, parentACObject, parameter, acIdentifier)
         {
             _PrintDPI = new ACPropertyConfigValue<short>(this, nameof(PrintDPI), 203);
+            _LabelHeight = new ACPropertyConfigValue<int>(this, nameof(LabelHeight), 800);
+            _LabelHeightMM = new ACPropertyConfigValue<double>(this, nameof(LabelHeightMM), 0);
         }
 
         public override bool ACInit(Global.ACStartTypes startChildMode = Global.ACStartTypes.Automatic)
@@ -52,6 +54,42 @@ namespace zpl.core.reporthandlerwpf
         {
             get => _PrintDPI.ValueT;
             set => _PrintDPI.ValueT = value;
+        }
+
+        private ACPropertyConfigValue<int> _LabelHeight;
+        [ACPropertyConfig("en{'Label Height (dots)'}de{'Label Höhe (Punkte)'}")]
+        public int LabelHeight
+        {
+            get => _LabelHeight.ValueT;
+            set => _LabelHeight.ValueT = value;
+        }
+
+        private ACPropertyConfigValue<double> _LabelHeightMM;
+        [ACPropertyConfig("en{'Label Height (mm) - if > 0, overrides dots setting'}de{'Label Höhe (mm) - wenn > 0, überschreibt Punkte-Einstellung'}")]
+        public double LabelHeightMM
+        {
+            get => _LabelHeightMM.ValueT;
+            set => _LabelHeightMM.ValueT = value;
+        }
+
+        /// <summary>
+        /// Calculates effective label height in dots, considering both manual dots setting and millimeter setting
+        /// </summary>
+        public int EffectiveLabelHeight
+        {
+            get
+            {
+                // If millimeter setting is provided (> 0), calculate dots from MM
+                if (LabelHeightMM > 0)
+                {
+                    // Convert MM to inches, then to dots
+                    double inches = LabelHeightMM / 25.4;
+                    return (int)Math.Round(inches * PrintDPI);
+                }
+                
+                // Otherwise use manual dots setting
+                return LabelHeight;
+            }
         }
 
         public string _LastPrintCommand;
@@ -112,6 +150,14 @@ namespace zpl.core.reporthandlerwpf
                         OnNewAlarmOccurred(ZPLPrinterAlarm, message);
 
                         return false;
+                    }
+
+                    // Insert label length command after ^XA
+                    if (commands.StartsWith("^XA"))
+                    {
+                        int insertPos = commands.IndexOf("^XA") + 3;
+                        string labelLengthCmd = $"^LL{EffectiveLabelHeight}";
+                        commands = commands.Insert(insertPos, labelLengthCmd);
                     }
 
                     LastPrintCommand = commands;
@@ -344,8 +390,32 @@ namespace zpl.core.reporthandlerwpf
             }
             else
             {
-                ZplBarcode128 barcode = new ZplBarcode128(barcodeValue, posX, posY, inlineBarcode.BarcodeHeight);
-                zplPrintJob.AddToJob(barcode, inlineBarcode.BarcodeHeight);
+                if (inlineBarcode.GS1Model != null && inlineBarcode.GS1Model.IsGs1 && !string.IsNullOrEmpty(inlineBarcode.GS1Model.ZplPayload))
+                {
+                    
+                    int barcodeHeight = inlineBarcode.BarcodeHeight > 0 ? inlineBarcode.BarcodeHeight : 100;
+                    if (barcodeHeight < 50)
+                        barcodeHeight = 50; // Minimum height for readability
+                    
+                    var gs1 = new ZplGs1Code128(
+                        x: posX,
+                        y: posY,
+                        fdData: inlineBarcode.GS1Model.ZplPayload,
+                        height: barcodeHeight,
+                        moduleWidth: 2,
+                        ratio: 3,
+                        printHri: true,
+                        hriAbove: false
+                    );
+                    
+                    int totalHeight = barcodeHeight + 30;
+                    zplPrintJob.AddToJob(gs1, totalHeight);
+                }
+                else
+                {
+                    ZplBarcode128 barcode = new ZplBarcode128(barcodeValue, posX, posY, inlineBarcode.BarcodeHeight);
+                    zplPrintJob.AddToJob(barcode, inlineBarcode.BarcodeHeight);
+                }
             }
         }
 
