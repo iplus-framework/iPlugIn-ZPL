@@ -68,9 +68,7 @@
     <Compile Include="ZPLPrintJob.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="VBControlScripts\2024-12-11 14-39_ihrastinski.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <Folder Include="VBControlScripts\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
