@@ -68,8 +68,7 @@
     <ProjectReference Include="..\..\iPlus\gip.core.reporthandler\gip.core.reporthandler.csproj" Condition="'$(UseProjectReferences)' == 'true'">
       <Project>{6ad88caf-a168-4bc2-9ece-f62e7b216465}</Project>
       <Name>gip.core.reporthandler</Name>
-    </ProjectReference>    
-
+    </ProjectReference>
     <Reference Include="BinaryKits.Zpl.Label, Version=3.2.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\BinaryKits.Zpl.Label.3.2.1\lib\net472\BinaryKits.Zpl.Label.dll</HintPath>
     </Reference>
@@ -81,8 +80,11 @@
     <Compile Include="ZPLPrinter.cs" />
     <Compile Include="ZPLPrintJob.cs" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="VBControlScripts\" />
+    <None Include="VBControlScripts\2024-12-11 14-39_ihrastinski.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
