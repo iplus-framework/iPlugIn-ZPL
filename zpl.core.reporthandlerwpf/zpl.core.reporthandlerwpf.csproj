@@ -62,7 +62,7 @@
       <Project>{16FB4111-5110-46E5-851D-38A4D7522F85}</Project>
       <Name>gip.core.datamodel</Name>
     </ProjectReference>
-    <Reference Include="gip.core.reporthandler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null, processorArchitecture=MSIL">
+    <Reference Include="gip.core.reporthandler, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null, processorArchitecture=MSIL" Condition="'$(UseProjectReferences)' != 'true'">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(IPlusIncludeDir)\gip.core.reporthandler.dll</HintPath>
     </Reference>
