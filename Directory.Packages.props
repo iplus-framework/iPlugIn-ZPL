@@ -1,0 +1,10 @@
+<Project>
+  <Import Project="..\iPlus\Directory.Packages.props" />
+  <ItemGroup>
+    <!-- 
+    <PackageVersion Include="BinaryKits.Zpl.Label" Version="3.2.1" />
+    <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageVersion Include="System.Data.DataSetExtensions" Version="4.6.0-preview3.19128.7" />    
+    -->
+  </ItemGroup>
+</Project>

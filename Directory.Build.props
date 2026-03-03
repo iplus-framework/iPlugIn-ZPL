@@ -1,0 +1,7 @@
+<Project>
+  <Import Project="..\iPlus\Directory.Build.props" />
+  <PropertyGroup>
+    <SolutionDir>$(MSBuildThisFileDirectory)</SolutionDir>
+    <UseProjectReferences Condition="'$(UseProjectReferences)' == ''">true</UseProjectReferences>
+  </PropertyGroup>
+</Project>

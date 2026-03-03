@@ -19,22 +19,34 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BinaryKits.Zpl.Label" Version="3.2.1" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.6.0-preview3.19128.7" />
+    <PackageReference Include="BinaryKits.Zpl.Label" />
+    <PackageReference Include="Microsoft.CSharp" />
+    <PackageReference Include="System.Data.DataSetExtensions" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="gip.core.autocomponent">
+  <ItemGroup>  
+    <Reference Include="gip.core.autocomponent" Condition="'$(UseProjectReferences)' != 'true'">
       <HintPath>$(IPlusIncludeDir)\gip.core.autocomponent.dll</HintPath>
     </Reference>
-    <Reference Include="gip.core.reporthandlerwpf">
-      <HintPath>$(IPlusIncludeDir)\gip.core.reporthandlerwpf.dll</HintPath>
-    </Reference>
-	<Reference Include="gip.core.reporthandlerwpf">
-      <HintPath>$(IPlusIncludeDir)\gip.core.reporthandler.dll</HintPath>
-    </Reference>
-    <Reference Include="gip.core.datamodel">
+    <ProjectReference Include="..\..\iPlus\gip.core.autocomponent\gip.core.autocomponent.csproj" Condition="'$(UseProjectReferences)' == 'true'">
+      <Name>gip.core.autocomponent</Name>
+    </ProjectReference>
+    <Reference Include="gip.core.datamodel" Condition="'$(UseProjectReferences)' != 'true'">
       <HintPath>$(IPlusIncludeDir)\gip.core.datamodel.dll</HintPath>
     </Reference>
+    <ProjectReference Include="..\..\iPlus\gip.core.datamodel\gip.core.datamodel.csproj" Condition="'$(UseProjectReferences)' == 'true'">
+      <Name>gip.core.datamodel</Name>
+    </ProjectReference>
+    <Reference Include="gip.core.reporthandlerwpf" Condition="'$(UseProjectReferences)' == 'true'">
+      <HintPath>$(IPlusIncludeDir)\gip.core.reporthandlerwpf.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\..\iPlus\gip.core.reporthandlerwpf\gip.core.reporthandlerwpf.csproj" Condition="'$(UseProjectReferences)' == 'true'">
+      <Name>gip.core.reporthandlerwpf</Name>
+    </ProjectReference>   
+	  <Reference Include="gip.core.reporthandler" Condition="'$(UseProjectReferences)' != 'true'">
+      <HintPath>$(IPlusIncludeDir)\gip.core.reporthandler.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\..\iPlus\gip.core.reporthandler\gip.core.reporthandler.csproj" Condition="'$(UseProjectReferences)' == 'true'">
+      <Name>gip.core.reporthandler</Name>
+    </ProjectReference>  
   </ItemGroup>
 </Project>
