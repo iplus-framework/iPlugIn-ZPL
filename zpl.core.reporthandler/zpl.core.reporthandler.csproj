@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(DefaultNetCoreTargetFramework)</TargetFramework>
+    <OutputType>Library</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseProjectReferences Condition="'$(UseProjectReferences)' == ''">true</UseProjectReferences>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <IPlusIncludeDir>..\..\iPlus\bin\Debug\$(DefaultNetCoreTargetFramework)</IPlusIncludeDir>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>..\bin\Release\</OutputPath>
+    <IPlusIncludeDir>..\..\iPlus\bin\Release\$(DefaultNetCoreTargetFramework)</IPlusIncludeDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Scryber.Drawing" Condition="'$(UseProjectReferences)' != 'true'">
+      <HintPath>$(IPlusIncludeDir)\Scryber.Drawing.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\..\scryber.core\Scryber.Drawing\Scryber.Drawing.csproj" Condition="'$(UseProjectReferences)' == 'true' and Exists('..\..\scryber.core\Scryber.Drawing\Scryber.Drawing.csproj')" />
+    <Reference Include="Scryber.Components" Condition="'$(UseProjectReferences)' != 'true'">
+      <HintPath>$(IPlusIncludeDir)\Scryber.Components.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\..\scryber.core\Scryber.Components\Scryber.Components.csproj" Condition="'$(UseProjectReferences)' == 'true' and Exists('..\..\scryber.core\Scryber.Components\Scryber.Components.csproj')" />
+
+    <Reference Include="gip.core.autocomponent" Condition="'$(UseProjectReferences)' != 'true'">
+      <HintPath>$(IPlusIncludeDir)\gip.core.autocomponent.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\..\iPlus\gip.core.autocomponent\gip.core.autocomponent.csproj" Condition="'$(UseProjectReferences)' == 'true'" />
+    <Reference Include="gip.core.datamodel" Condition="'$(UseProjectReferences)' != 'true'">
+      <HintPath>$(IPlusIncludeDir)\gip.core.datamodel.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\..\iPlus\gip.core.datamodel\gip.core.datamodel.csproj" Condition="'$(UseProjectReferences)' == 'true'" />
+    <Reference Include="gip.core.reporthandler" Condition="'$(UseProjectReferences)' != 'true'">
+      <HintPath>$(IPlusIncludeDir)\gip.core.reporthandler.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\..\iPlus\gip.core.reporthandler\gip.core.reporthandler.csproj" Condition="'$(UseProjectReferences)' == 'true'" />
+  </ItemGroup>
+</Project>

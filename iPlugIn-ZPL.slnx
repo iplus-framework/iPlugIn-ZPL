@@ -3,5 +3,6 @@
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
   </Folder>
+  <Project Path="zpl.core.reporthandler/zpl.core.reporthandler.csproj" />
   <Project Path="zpl.core.reporthandlerwpf/zpl.core.reporthandlerwpf.csproj" />
 </Solution>

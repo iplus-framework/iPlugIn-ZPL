@@ -21,7 +21,7 @@ namespace zpl.core.reporthandlerwpf
             int ratio = 3,
             bool printHri = true,
             bool hriAbove = false
-        ) : base(x, y)
+        ) : base(x, y, false, false, FieldJustification.Left)
         {
             _fdData = fdData ?? "";
             _height = height > 0 ? height : 100;

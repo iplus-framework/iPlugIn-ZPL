@@ -24,6 +24,18 @@
     <PackageReference Include="System.Data.DataSetExtensions" />
   </ItemGroup>
   <ItemGroup>  
+    <Reference Include="Scryber.Drawing" Condition="'$(UseProjectReferences)' != 'true'">
+      <HintPath>$(IPlusIncludeDir)\Scryber.Drawing.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\..\scryber.core\Scryber.Drawing\Scryber.Drawing.csproj" Condition="'$(UseProjectReferences)' == 'true' and Exists('..\..\scryber.core\Scryber.Drawing\Scryber.Drawing.csproj')">
+      <Name>Scryber.Drawing</Name>
+    </ProjectReference>
+    <Reference Include="Scryber.Components" Condition="'$(UseProjectReferences)' != 'true'">
+      <HintPath>$(IPlusIncludeDir)\Scryber.Components.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\..\scryber.core\Scryber.Components\Scryber.Components.csproj" Condition="'$(UseProjectReferences)' == 'true' and Exists('..\..\scryber.core\Scryber.Components\Scryber.Components.csproj')">
+      <Name>Scryber.Components</Name>
+    </ProjectReference>
     <Reference Include="gip.core.autocomponent" Condition="'$(UseProjectReferences)' != 'true'">
       <HintPath>$(IPlusIncludeDir)\gip.core.autocomponent.dll</HintPath>
     </Reference>
@@ -48,5 +60,8 @@
     <ProjectReference Include="..\..\iPlus\gip.core.reporthandler\gip.core.reporthandler.csproj" Condition="'$(UseProjectReferences)' == 'true'">
       <Name>gip.core.reporthandler</Name>
     </ProjectReference>  
+    <ProjectReference Include="..\zpl.core.reporthandler\zpl.core.reporthandler.csproj" Condition="Exists('..\zpl.core.reporthandler\zpl.core.reporthandler.csproj')">
+      <Name>zpl.core.reporthandler</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

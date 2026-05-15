@@ -11,6 +11,7 @@ using System.IO;
 using gip.core.reporthandlerwpf;
 using gip.core.reporthandler;
 using gip.core.reporthandlerwpf.Flowdoc;
+using System.Text;
 
 namespace zpl.core.reporthandlerwpf
 {
@@ -22,6 +23,7 @@ namespace zpl.core.reporthandlerwpf
         public ZPLPrinter(ACClass acType, IACObject content, IACObject parentACObject, ACValueList parameter, string acIdentifier = "") : 
             base(acType, content, parentACObject, parameter, acIdentifier)
         {
+            _UseScryberLayoutRenderer = new ACPropertyConfigValue<bool>(this, nameof(UseScryberLayoutRenderer), true);
             _PrintDPI = new ACPropertyConfigValue<short>(this, nameof(PrintDPI), 203);
             _LabelHeight = new ACPropertyConfigValue<int>(this, nameof(LabelHeight), 800);
             _LabelHeightMM = new ACPropertyConfigValue<double>(this, nameof(LabelHeightMM), 0);
@@ -30,6 +32,7 @@ namespace zpl.core.reporthandlerwpf
         public override bool ACInit(Global.ACStartTypes startChildMode = Global.ACStartTypes.Automatic)
         {
             bool init = base.ACInit(startChildMode);
+            _ = UseScryberLayoutRenderer;
             _ = PrintDPI;
             return init;
         }
@@ -50,6 +53,15 @@ namespace zpl.core.reporthandlerwpf
         }
 
         private ACPropertyConfigValue<short> _PrintDPI;
+        private ACPropertyConfigValue<bool> _UseScryberLayoutRenderer;
+
+        [ACPropertyConfig("en{'Use Scryber layout renderer'}de{'Scryber-Layout-Renderer verwenden'}")]
+        public bool UseScryberLayoutRenderer
+        {
+            get => _UseScryberLayoutRenderer.ValueT;
+            set => _UseScryberLayoutRenderer.ValueT = value;
+        }
+
         [ACPropertyConfig("en{'Print DPI'}de{'Print DPI'}")]
         public short PrintDPI
         {
@@ -122,6 +134,56 @@ namespace zpl.core.reporthandlerwpf
 
         #region Methods -> Render
 
+        protected override PrintJob TryCreateScryberCustomPrintJob(ACClassDesign aCClassDesign, ReportData reportData)
+        {
+            if (!UseScryberLayoutRenderer || aCClassDesign == null || reportData == null)
+                return null;
+
+            string template = GetScryberTemplate(aCClassDesign);
+            if (string.IsNullOrWhiteSpace(template))
+                return null;
+
+            try
+            {
+                Encoding encoding = ResolveEncoding();
+                ZPLScryberLayoutRenderer renderer = new ZPLScryberLayoutRenderer();
+                byte[] payload = ScryberReportEngine.RenderWithLayoutRenderer(template, reportData, renderer);
+                if (payload == null || payload.Length == 0)
+                    return null;
+
+                return new PrintJob
+                {
+                    Name = aCClassDesign.ACIdentifier,
+                    Main = payload,
+                    Encoding = encoding,
+                    ColumnMultiplier = 1,
+                    ColumnDivisor = 1,
+                };
+            }
+            catch (Exception ex)
+            {
+                Messages.LogException(GetACUrl(), nameof(TryCreateScryberCustomPrintJob), ex);
+                return null;
+            }
+        }
+
+        private Encoding ResolveEncoding()
+        {
+            Encoding encoder = Encoding.ASCII;
+            if (CodePage <= 0)
+                return encoder;
+
+            try
+            {
+                return Encoding.GetEncoding(CodePage);
+            }
+            catch (Exception ex)
+            {
+                Messages.LogException(GetACUrl(), nameof(ResolveEncoding), ex);
+                return encoder;
+            }
+        }
+
         /// <summary>
         /// Convert report data to stream
         /// </summary>
@@ -129,19 +191,32 @@ namespace zpl.core.reporthandlerwpf
         /// <exception cref="NotImplementedException"></exception>
         public override bool SendDataToPrinter(PrintJob printJob)
         {
-            ZPLPrintJob zplPrintJob = printJob as ZPLPrintJob;
-
-            if (zplPrintJob == null)
+            if (printJob == null)
                 return false;
 
             for (int tries = 0; tries < PrintTries; tries++)
             {
                 try
                 {
-                    ZplRenderOptions renderOptions = new ZplRenderOptions();
-                    renderOptions.TargetPrintDpi = PrintDPI;
-                    ZplEngine zplEngine = new ZplEngine(zplPrintJob.ZplElements);
-                    string commands = zplEngine.ToZplString(renderOptions);
+                    string commands;
+                    ZPLPrintJob zplPrintJob = printJob as ZPLPrintJob;
+
+                    if (zplPrintJob != null)
+                    {
+                        ZplRenderOptions renderOptions = new ZplRenderOptions();
+                        renderOptions.TargetPrintDpi = PrintDPI;
+                        ZplEngine zplEngine = new ZplEngine(zplPrintJob.ZplElements);
+                        commands = zplEngine.ToZplString(renderOptions);
+                    }
+                    else if (printJob.Main != null && printJob.Main.Length > 0)
+                    {
+                        Encoding encoding = printJob.Encoding ?? ResolveEncoding();
+                        commands = encoding.GetString(printJob.Main);
+                    }
+                    else
+                    {
+                        return false;
+                    }
 
                     if (string.IsNullOrEmpty(commands))
                     {
