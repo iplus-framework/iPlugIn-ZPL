@@ -36,4 +36,9 @@
     </Reference>
     <ProjectReference Include="..\..\iPlus\gip.core.reporthandler\gip.core.reporthandler.csproj" Condition="'$(UseProjectReferences)' == 'true'" />
   </ItemGroup>
+	<ItemGroup>
+		<None Update="VBControlScripts/2026-05-18 19-09_dlisak.zip">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>  
 </Project>
