@@ -2,7 +2,7 @@
 using BinaryKits.Zpl.Label.Elements;
 using System.Collections.Generic;
 
-namespace zpl.core.reporthandlerwpf
+namespace zpl.core.reporthandler
 {
     public class ZplGs1Code128 : ZplPositionedElementBase
     {

@@ -11,6 +11,7 @@ using System.IO;
 using gip.core.reporthandlerwpf;
 using gip.core.reporthandler;
 using gip.core.reporthandlerwpf.Flowdoc;
+using zpl.core.reporthandler;
 using System.Text;
 
 namespace zpl.core.reporthandlerwpf
@@ -133,39 +134,6 @@ namespace zpl.core.reporthandlerwpf
         #region Methods 
 
         #region Methods -> Render
-
-        protected override PrintJob TryCreateScryberCustomPrintJob(ACClassDesign aCClassDesign, ReportData reportData)
-        {
-            if (!UseScryberLayoutRenderer || aCClassDesign == null || reportData == null)
-                return null;
-
-            string template = GetScryberTemplate(aCClassDesign);
-            if (string.IsNullOrWhiteSpace(template))
-                return null;
-
-            try
-            {
-                Encoding encoding = ResolveEncoding();
-                ZPLScryberLayoutRenderer renderer = new ZPLScryberLayoutRenderer();
-                byte[] payload = ScryberReportEngine.RenderWithLayoutRenderer(template, reportData, renderer);
-                if (payload == null || payload.Length == 0)
-                    return null;
-
-                return new PrintJob
-                {
-                    Name = aCClassDesign.ACIdentifier,
-                    Main = payload,
-                    Encoding = encoding,
-                    ColumnMultiplier = 1,
-                    ColumnDivisor = 1,
-                };
-            }
-            catch (Exception ex)
-            {
-                Messages.LogException(GetACUrl(), nameof(TryCreateScryberCustomPrintJob), ex);
-                return null;
-            }
-        }
 
         private Encoding ResolveEncoding()
         {

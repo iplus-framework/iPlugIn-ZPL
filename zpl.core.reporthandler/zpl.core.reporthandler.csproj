@@ -14,6 +14,11 @@
     <IPlusIncludeDir>..\..\iPlus\bin\Release\$(DefaultNetCoreTargetFramework)</IPlusIncludeDir>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="BinaryKits.Zpl.Label" />
+    <PackageReference Include="Microsoft.CSharp" />
+    <PackageReference Include="System.Data.DataSetExtensions" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Scryber.Drawing" Condition="'$(UseProjectReferences)' != 'true'">
       <HintPath>$(IPlusIncludeDir)\Scryber.Drawing.dll</HintPath>
     </Reference>
