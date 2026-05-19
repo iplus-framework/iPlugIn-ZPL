@@ -1,3 +1,5 @@
+using BinaryKits.Zpl.Label;
+using BinaryKits.Zpl.Label.Elements;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,12 +22,18 @@ namespace zpl.core.reporthandler
     /// </summary>
     public sealed class ZPLScryberLayoutRendererX : IDocumentLayoutRenderer
     {
+        private readonly List<ZplPositionedElementBase> _zplElements = new List<ZplPositionedElementBase>();
+
+        public IReadOnlyList<ZplPositionedElementBase> ZplElements => _zplElements;
+
         public void Render(ScryberDocument document, PDFLayoutDocument layout, PDFLayoutContext layoutContext, Stream output)
         {
             if (layout == null)
                 throw new ArgumentNullException(nameof(layout));
             if (output == null)
                 throw new ArgumentNullException(nameof(output));
+
+            _zplElements.Clear();
 
             StringBuilder zpl = new StringBuilder();
             zpl.Append("^XA");
@@ -50,7 +58,7 @@ namespace zpl.core.reporthandler
             output.Write(bytes, 0, bytes.Length);
         }
 
-        private static void WriteBlock(StringBuilder zpl, ScryberDocument document, PDFLayoutBlock block, ref int y)
+        private void WriteBlock(StringBuilder zpl, ScryberDocument document, PDFLayoutBlock block, ref int y)
         {
             if (block == null)
                 return;
@@ -68,7 +76,7 @@ namespace zpl.core.reporthandler
             }
         }
 
-        private static void WriteRegion(StringBuilder zpl, ScryberDocument document, PDFLayoutRegion region, ref int y)
+        private void WriteRegion(StringBuilder zpl, ScryberDocument document, PDFLayoutRegion region, ref int y)
         {
             if (region == null || region.Contents == null)
                 return;
@@ -86,7 +94,7 @@ namespace zpl.core.reporthandler
             }
         }
 
-        private static void WriteLine(StringBuilder zpl, ScryberDocument document, PDFLayoutLine line, ref int y)
+        private void WriteLine(StringBuilder zpl, ScryberDocument document, PDFLayoutLine line, ref int y)
         {
             if (line?.Runs == null || line.Runs.Count == 0)
                 return;
@@ -98,10 +106,11 @@ namespace zpl.core.reporthandler
 
             StringBuilder text = new StringBuilder();
             int consumedHeight = 40;
+            HashSet<string> emittedBarcodeKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (PDFLayoutRun run in line.Runs)
             {
-                if (TryAppendBarcodeRun(zpl, document, run, lineX, lineY, out int barcodeHeight))
+                if (TryAppendBarcodeRun(zpl, document, run, lineX, lineY, emittedBarcodeKeys, out int barcodeHeight))
                 {
                     if (barcodeHeight > consumedHeight)
                         consumedHeight = barcodeHeight;
@@ -116,6 +125,10 @@ namespace zpl.core.reporthandler
             string plainText = text.ToString().TrimEnd();
             if (!string.IsNullOrWhiteSpace(plainText))
             {
+                ZplFont font = new ZplFont(24, 30);
+                ZplTextField textField = new ZplTextField(EscapeZplData(plainText), lineX, lineY, font);
+                _zplElements.Add(textField);
+
                 zpl.Append("^FO");
                 zpl.Append(lineX);
                 zpl.Append(",");
@@ -123,32 +136,43 @@ namespace zpl.core.reporthandler
                 zpl.Append("^A0N,30,24^FD");
                 zpl.Append(EscapeZplData(plainText));
                 zpl.Append("^FS");
+
+                if (font.FontHeight > consumedHeight)
+                    consumedHeight = font.FontHeight;
             }
 
             y = lineY + consumedHeight;
         }
 
-        private static bool TryAppendBarcodeRun(StringBuilder zpl, ScryberDocument document, PDFLayoutRun run, int defaultX, int y, out int consumedHeight)
+        private bool TryAppendBarcodeRun(StringBuilder zpl, ScryberDocument document, PDFLayoutRun run, int defaultX, int y, HashSet<string> emittedBarcodeKeys, out int consumedHeight)
         {
             consumedHeight = 40;
 
             Component component = run?.Owner as Component;
-            if (!TryGetMetadata(component, out string barcodeTypeValue, "barcode-type", "zpl-barcode-type"))
+            if (!TryGetMetadata(component, out string barcodeTypeValue, out Component barcodeMetadataOwner, "barcode-type", "zpl-barcode-type"))
                 return false;
 
-            string barcodeValue = ResolveBarcodeValue(document, component, run, out GS1Model gs1Model);
+            Component barcodeComponent = barcodeMetadataOwner ?? component;
+            string barcodeDedupKey = BuildBarcodeDedupKey(barcodeComponent, barcodeTypeValue);
+            if (!emittedBarcodeKeys.Add(barcodeDedupKey))
+                return true;
+
+            string barcodeValue = ResolveBarcodeValue(document, barcodeComponent, run, out GS1Model gs1Model);
             if (string.IsNullOrWhiteSpace(barcodeValue))
                 return true;
 
-            int x = GetIntMetadata(component, defaultX, "barcode-x");
+            int x = GetIntMetadata(barcodeComponent, defaultX, "barcode-x");
 
             if (barcodeTypeValue.Equals("QRCODE", StringComparison.OrdinalIgnoreCase))
             {
-                int qrScale = GetIntMetadata(component, 4, "barcode-height", "qr-pixels-per-module", "barcode-width");
+                int qrScale = GetIntMetadata(barcodeComponent, 4, "barcode-height", "qr-pixels-per-module", "barcode-width");
                 if (qrScale > 10)
                     qrScale = 10;
                 else if (qrScale < 1)
                     qrScale = 1;
+
+                ZplQrCode qrCode = new ZplQrCode(EscapeZplData(barcodeValue), x, y, 2, qrScale);
+                _zplElements.Add(qrCode);
 
                 zpl.Append("^FO");
                 zpl.Append(x);
@@ -166,12 +190,26 @@ namespace zpl.core.reporthandler
                 return true;
             }
 
-            int barcodeHeight = GetIntMetadata(component, 100, "barcode-height");
+            int barcodeHeight = GetIntMetadata(barcodeComponent, 100, "barcode-height");
             if (barcodeHeight < 20)
                 barcodeHeight = 20;
 
             if (barcodeTypeValue.Equals("CODE128", StringComparison.OrdinalIgnoreCase) && gs1Model != null && gs1Model.IsGs1 && !string.IsNullOrWhiteSpace(gs1Model.ZplPayload))
             {
+                if (barcodeHeight < 50)
+                    barcodeHeight = 50;
+
+                ZplGs1Code128 gs1 = new ZplGs1Code128(
+                    x: x,
+                    y: y,
+                    fdData: EscapeZplData(gs1Model.ZplPayload),
+                    height: barcodeHeight,
+                    moduleWidth: 2,
+                    ratio: 3,
+                    printHri: true,
+                    hriAbove: false);
+                _zplElements.Add(gs1);
+
                 zpl.Append("^FO");
                 zpl.Append(x);
                 zpl.Append(",");
@@ -188,6 +226,9 @@ namespace zpl.core.reporthandler
 
             if (barcodeTypeValue.Equals("CODE128", StringComparison.OrdinalIgnoreCase))
             {
+                ZplBarcode128 barcode = new ZplBarcode128(EscapeZplData(barcodeValue), x, y, barcodeHeight);
+                _zplElements.Add(barcode);
+
                 zpl.Append("^FO");
                 zpl.Append(x);
                 zpl.Append(",");
@@ -203,6 +244,17 @@ namespace zpl.core.reporthandler
             }
 
             return false;
+        }
+
+        private static string BuildBarcodeDedupKey(Component barcodeComponent, string barcodeType)
+        {
+            string id = barcodeComponent?.ID;
+            if (string.IsNullOrWhiteSpace(id))
+                id = barcodeComponent?.UniqueID;
+            if (string.IsNullOrWhiteSpace(id))
+                id = barcodeComponent?.ElementName ?? "unknown";
+
+            return id + "|" + (barcodeType ?? string.Empty);
         }
 
         private static string ResolveBarcodeValue(ScryberDocument document, Component component, PDFLayoutRun run, out GS1Model gs1Model)
@@ -292,23 +344,44 @@ namespace zpl.core.reporthandler
 
         private static bool TryGetMetadata(Component component, out string value, params string[] keys)
         {
+            return TryGetMetadata(component, out value, out _, keys);
+        }
+
+        private static bool TryGetMetadata(Component component, out string value, out Component metadataOwner, params string[] keys)
+        {
             value = null;
+            metadataOwner = null;
             if (component == null || keys == null || keys.Length == 0)
                 return false;
 
-            foreach (string key in keys)
+            foreach (Component candidate in EnumerateCandidateComponents(component))
             {
-                if (string.IsNullOrWhiteSpace(key))
-                    continue;
-
-                if (component.TryGetMetadata(key, out value) && !string.IsNullOrWhiteSpace(value))
+                foreach (string key in keys)
                 {
-                    value = value.Trim();
-                    return true;
+                    if (string.IsNullOrWhiteSpace(key))
+                        continue;
+
+                    if (candidate.TryGetMetadata(key, out value) && !string.IsNullOrWhiteSpace(value))
+                    {
+                        value = value.Trim();
+                        metadataOwner = candidate;
+                        return true;
+                    }
                 }
             }
 
             return false;
+        }
+
+        private static IEnumerable<Component> EnumerateCandidateComponents(Component component)
+        {
+            HashSet<Component> visited = new HashSet<Component>();
+            Component current = component;
+            while (current != null && visited.Add(current))
+            {
+                yield return current;
+                current = current.Parent;
+            }
         }
 
         private static int GetIntMetadata(Component component, int defaultValue, params string[] keys)

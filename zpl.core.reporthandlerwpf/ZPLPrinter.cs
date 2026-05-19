@@ -19,6 +19,8 @@ namespace zpl.core.reporthandlerwpf
     [ACClassInfo(Const.PackName_VarioSystem, "en{'ZPLPrinter'}de{'ZPLPrinter'}", Global.ACKinds.TPABGModule, Global.ACStorableTypes.Required, false, false)]
     public class ZPLPrinter : ACPrintServerBaseWPF
     {
+        private readonly ZPLPrinterXShared _shared = new ZPLPrinterXShared();
+
         #region c'tors
 
         public ZPLPrinter(ACClass acType, IACObject content, IACObject parentACObject, ACValueList parameter, string acIdentifier = "") : 
@@ -166,25 +168,7 @@ namespace zpl.core.reporthandlerwpf
             {
                 try
                 {
-                    string commands;
-                    ZPLPrintJob zplPrintJob = printJob as ZPLPrintJob;
-
-                    if (zplPrintJob != null)
-                    {
-                        ZplRenderOptions renderOptions = new ZplRenderOptions();
-                        renderOptions.TargetPrintDpi = PrintDPI;
-                        ZplEngine zplEngine = new ZplEngine(zplPrintJob.ZplElements);
-                        commands = zplEngine.ToZplString(renderOptions);
-                    }
-                    else if (printJob.Main != null && printJob.Main.Length > 0)
-                    {
-                        Encoding encoding = printJob.Encoding ?? ResolveEncoding();
-                        commands = encoding.GetString(printJob.Main);
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    string commands = _shared.BuildCommands(printJob, ResolveEncoding(), PrintDPI, EffectiveLabelHeight);
 
                     if (string.IsNullOrEmpty(commands))
                     {
@@ -194,14 +178,6 @@ namespace zpl.core.reporthandlerwpf
                         OnNewAlarmOccurred(ZPLPrinterAlarm, message);
 
                         return false;
-                    }
-
-                    // Insert label length command after ^XA
-                    if (commands.StartsWith("^XA"))
-                    {
-                        int insertPos = commands.IndexOf("^XA") + 3;
-                        string labelLengthCmd = $"^LL{EffectiveLabelHeight}";
-                        commands = commands.Insert(insertPos, labelLengthCmd);
                     }
 
                     LastPrintCommand = commands;

@@ -1,26 +1,25 @@
-﻿using BinaryKits.Zpl.Label.Elements;
-using gip.core.reporthandlerwpf;
+using BinaryKits.Zpl.Label.Elements;
+using gip.core.reporthandler;
 using System.Collections.Generic;
-using zpl.core.reporthandler;
 
-namespace zpl.core.reporthandlerwpf
+namespace zpl.core.reporthandler
 {
-    public class ZPLPrintJob : PrintJobWPF, IZPLPrintJob
+    public class ZPLPrintJobX : PrintJob, IZPLPrintJob
     {
-        public ZPLPrintJob() : base()
+        public ZPLPrintJobX() : base()
         {
             NextYPosition = 10;
         }
 
-        private List<ZplPositionedElementBase> _ZplElements;
+        private List<ZplPositionedElementBase> _zplElements;
         public List<ZplPositionedElementBase> ZplElements
         {
             get
             {
-                if (_ZplElements == null)
-                    _ZplElements = new List<ZplPositionedElementBase>();
+                if (_zplElements == null)
+                    _zplElements = new List<ZplPositionedElementBase>();
 
-                return _ZplElements;
+                return _zplElements;
             }
         }
 

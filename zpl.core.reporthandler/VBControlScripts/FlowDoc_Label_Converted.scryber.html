@@ -1,0 +1,81 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <title>Facility Charge Label</title>
+  <style>
+    @page {
+      size: 80mm 120mm;
+      margin: 3mm;
+    }
+
+    body {
+      font-family: Calibri, Arial, sans-serif;
+      font-size: 12pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    p {
+      margin: 0 0 2mm 0;
+      text-align: left;
+    }
+
+    .label {
+      font-size: 12pt;
+      font-weight: normal;
+    }
+
+    .value-lg {
+      font-size: 14pt;
+      font-weight: bold;
+    }
+
+    .value {
+      font-size: 12pt;
+      font-weight: bold;
+    }
+
+    .center {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <p class="label">Chargennummer:</p>
+  <p class="value-lg">{{CurrentFacilityCharge.FacilityLot.LotNo}}</p>
+
+  <p class="label">Split:</p>
+  <p class="value-lg">{{CurrentFacilityCharge.SplitNo}}</p>
+
+  <p class="label">Material Nr:</p>
+  <p class="value">{{CurrentFacilityCharge.Material.MaterialNo}}</p>
+
+  <p class="label">Materialbez:</p>
+  <p class="value">{{CurrentFacilityCharge.Material.MaterialName1}}</p>
+
+  <p class="label">Menge:</p>
+  <p class="value">{{format(CurrentFacilityCharge.StockQuantityUOM, '##,0.0')}}</p>
+
+  <p class="label">Auftragsnummer:</p>
+  <p class="value">{{CurrentFacilityCharge.ProdOrderProgramNo}}</p>
+
+  <p class="label">Lager:</p>
+  <p class="value">{{CurrentFacilityCharge.Facility.FacilityNo}} {{CurrentFacilityCharge.Facility.FacilityName}}</p>
+
+  <p class="center">
+    <span
+      data-barcode-type="QRCODE"
+      data-zpl-barcode-type="QRCODE"
+      data-escpos-barcode-type="QRCODE"
+      data-barcode-align="center"
+      data-barcode-width="6"
+      data-barcode-height="6"
+      data-qr-pixels-per-module="6"
+      data-vb-content="CurrentFacilityCharge"
+      data-vb-show-columns="FacilityLot\LotNo,FacilityLot\ProductionDate,FacilityLot\ExpirationDate,Material\MaterialNo,SplitNo"
+      data-vb-show-columns-keys="10,11,17,240,30"
+      data-show-hri="false">{{CurrentFacilityCharge.FacilityLot.LotNo}}</span>
+  </p>
+</body>
+</html>

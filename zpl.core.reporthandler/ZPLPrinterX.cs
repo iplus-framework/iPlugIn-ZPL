@@ -12,6 +12,7 @@ namespace zpl.core.reporthandler
     [ACClassInfo(Const.PackName_VarioSystem, "en{'ZPLPrinterX'}de{'ZPLPrinterX'}", Global.ACKinds.TPABGModule, Global.ACStorableTypes.Required, false, false)]
     public class ZPLPrinterX : ACPrintServerBase
     {
+        private readonly ZPLPrinterXShared _shared;
         private ACPropertyConfigValue<short> _PrintDPI;
         private ACPropertyConfigValue<bool> _UseScryberLayoutRenderer;
         private ACPropertyConfigValue<int> _LabelHeight;
@@ -20,6 +21,7 @@ namespace zpl.core.reporthandler
         public ZPLPrinterX(ACClass acType, IACObject content, IACObject parentACObject, ACValueList parameter, string acIdentifier = "")
             : base(acType, content, parentACObject, parameter, acIdentifier)
         {
+            _shared = new ZPLPrinterXShared();
             _UseScryberLayoutRenderer = new ACPropertyConfigValue<bool>(this, nameof(UseScryberLayoutRenderer), true);
             _PrintDPI = new ACPropertyConfigValue<short>(this, nameof(PrintDPI), 203);
             _LabelHeight = new ACPropertyConfigValue<int>(this, nameof(LabelHeight), 800);
@@ -107,18 +109,25 @@ namespace zpl.core.reporthandler
             {
                 Encoding encoding = ResolveEncoding();
                 ZPLScryberLayoutRendererX renderer = new ZPLScryberLayoutRendererX();
-                byte[] payload = ScryberReportEngine.RenderWithLayoutRenderer(template, reportData, renderer);
-                if (payload == null || payload.Length == 0)
+                _ = ScryberReportEngine.RenderWithLayoutRenderer(template, reportData, renderer);
+                if (renderer.ZplElements == null || renderer.ZplElements.Count == 0)
                     return null;
 
-                return new PrintJob
+                ZPLPrintJobX zplPrintJob = new ZPLPrintJobX
                 {
                     Name = aCClassDesign.ACIdentifier,
-                    Main = payload,
                     Encoding = encoding,
                     ColumnMultiplier = 1,
                     ColumnDivisor = 1,
                 };
+
+                foreach (var element in renderer.ZplElements)
+                {
+                    if (element != null)
+                        zplPrintJob.ZplElements.Add(element);
+                }
+
+                return zplPrintJob;
             }
             catch (Exception ex)
             {
@@ -146,15 +155,14 @@ namespace zpl.core.reporthandler
 
         public override bool SendDataToPrinter(PrintJob printJob)
         {
-            if (printJob?.Main == null || printJob.Main.Length == 0)
+            if (printJob == null)
                 return false;
 
             for (int tries = 0; tries < PrintTries; tries++)
             {
                 try
                 {
-                    Encoding encoding = printJob.Encoding ?? ResolveEncoding();
-                    string commands = encoding.GetString(printJob.Main);
+                    string commands = _shared.BuildCommands(printJob, ResolveEncoding(), PrintDPI, EffectiveLabelHeight);
 
                     if (string.IsNullOrEmpty(commands))
                     {
@@ -163,13 +171,6 @@ namespace zpl.core.reporthandler
                             Messages.LogError(GetACUrl(), nameof(SendDataToPrinter), message);
                         OnNewAlarmOccurred(ZPLPrinterAlarm, message);
                         return false;
-                    }
-
-                    if (commands.StartsWith("^XA", StringComparison.Ordinal))
-                    {
-                        int insertPos = commands.IndexOf("^XA", StringComparison.Ordinal) + 3;
-                        string labelLengthCmd = $"^LL{EffectiveLabelHeight}";
-                        commands = commands.Insert(insertPos, labelLengthCmd);
                     }
 
                     LastPrintCommand = commands;
