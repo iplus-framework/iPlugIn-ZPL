@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\iPlus\Directory.Build.props" />
   <PropertyGroup>
     <TargetFramework>$(UITargetFramework)</TargetFramework>
     <OutputType>Library</OutputType>
@@ -20,7 +19,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BinaryKits.Zpl.Label" />
-    <PackageReference Include="Microsoft.CSharp" />
     <PackageReference Include="System.Data.DataSetExtensions" />
   </ItemGroup>
   <ItemGroup>  
