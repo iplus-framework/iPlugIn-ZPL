@@ -17,6 +17,7 @@ namespace zpl.core.reporthandler
         private ACPropertyConfigValue<bool> _UseScryberLayoutRenderer;
         private ACPropertyConfigValue<int> _LabelHeight;
         private ACPropertyConfigValue<double> _LabelHeightMM;
+        private ACPropertyConfigValue<bool> _PrintConfigWithContent;
 
         public ZPLPrinterX(ACClass acType, IACObject content, IACObject parentACObject, ACValueList parameter, string acIdentifier = "")
             : base(acType, content, parentACObject, parameter, acIdentifier)
@@ -26,6 +27,7 @@ namespace zpl.core.reporthandler
             _PrintDPI = new ACPropertyConfigValue<short>(this, nameof(PrintDPI), 203);
             _LabelHeight = new ACPropertyConfigValue<int>(this, nameof(LabelHeight), 800);
             _LabelHeightMM = new ACPropertyConfigValue<double>(this, nameof(LabelHeightMM), 0);
+            _PrintConfigWithContent = new ACPropertyConfigValue<bool>(this, nameof(PrintConfigWithContent), false);
         }
 
         public override bool ACInit(Global.ACStartTypes startChildMode = Global.ACStartTypes.Automatic)
@@ -33,6 +35,9 @@ namespace zpl.core.reporthandler
             bool init = base.ACInit(startChildMode);
             _ = UseScryberLayoutRenderer;
             _ = PrintDPI;
+            _ = LabelHeight;
+            _ = LabelHeightMM;
+            _ = PrintConfigWithContent;
             return init;
         }
 
@@ -62,6 +67,14 @@ namespace zpl.core.reporthandler
         {
             get => _LabelHeightMM.ValueT;
             set => _LabelHeightMM.ValueT = value;
+        }
+
+
+        [ACPropertyConfig("en{'Print configuration together with print job'}de{'Druckerkonfiguration zusammen mit Druckauftrag drucken'}")]
+        public bool PrintConfigWithContent
+        {
+            get => _PrintConfigWithContent.ValueT;
+            set => _PrintConfigWithContent.ValueT = value;
         }
 
         public int EffectiveLabelHeight
@@ -162,7 +175,9 @@ namespace zpl.core.reporthandler
             {
                 try
                 {
-                    string commands = _shared.BuildCommands(printJob, ResolveEncoding(), PrintDPI, EffectiveLabelHeight);
+                    string commands = _shared.BuildCommands(printJob, ResolveEncoding(), PrintDPI, 
+                                                            EffectiveLabelHeight, 
+                                                            PinterConfigTogetherWithPrintJob ? ZPLPrinterConfiguration?.ValueT : null);
 
                     if (string.IsNullOrEmpty(commands))
                     {
@@ -193,7 +208,7 @@ namespace zpl.core.reporthandler
 
         public override void SendDataBeforePrint(PrintJob printJob)
         {
-            if (ZPLPrinterConfiguration != null)
+            if (ZPLPrinterConfiguration != null && !PinterConfigTogetherWithPrintJob)
             {
                 string printerConfiguration = ZPLPrinterConfiguration.ValueT;
                 if (!string.IsNullOrEmpty(printerConfiguration))

@@ -7,13 +7,22 @@ namespace zpl.core.reporthandler
 {
     public sealed class ZPLPrinterXShared
     {
-        public string BuildCommands(PrintJob printJob, Encoding fallbackEncoding, short printDpi, int labelHeight)
+        public string BuildCommands(PrintJob printJob, Encoding fallbackEncoding, short printDpi, int labelHeight, string printerConfiguration = null)
         {
-            string commands = BuildCommandsInternal(printJob, fallbackEncoding, printDpi);
-            if (string.IsNullOrWhiteSpace(commands))
+            string contentCommand = BuildCommandsInternal(printJob, fallbackEncoding, printDpi);
+            if (string.IsNullOrWhiteSpace(contentCommand))
                 return string.Empty;
 
-            return EnsureLabelLength(commands, labelHeight);
+            contentCommand = EnsureLabelLength(contentCommand, labelHeight);
+
+            if (!string.IsNullOrWhiteSpace(printerConfiguration))
+            {
+                string configurationCommand = EnsureLabelLengthInConfiguration(printerConfiguration, labelHeight);            
+                if (!string.IsNullOrWhiteSpace(configurationCommand))
+                    contentCommand = configurationCommand + Environment.NewLine + contentCommand;
+            }
+
+            return contentCommand;
         }
 
         private static string BuildCommandsInternal(PrintJob printJob, Encoding fallbackEncoding, short printDpi)
@@ -55,6 +64,20 @@ namespace zpl.core.reporthandler
                 return commands;
 
             return commands.Insert(insertPos, labelLengthCmd);
+        }
+
+        private static string EnsureLabelLengthInConfiguration(string commands, int labelHeight)
+        {
+            if (string.IsNullOrWhiteSpace(commands) || labelHeight <= 0)
+                return commands;
+
+            const string placeholder = "! U1 setvar \"zpl.label_length\" \"{labelHeight}\"";
+
+            if (!commands.Contains(placeholder))
+                return commands;
+
+            string replacement = $"! U1 setvar \"zpl.label_length\" \"{labelHeight}\"";
+            return commands.Replace(placeholder, replacement);
         }
     }
 }

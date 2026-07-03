@@ -46,7 +46,7 @@
     <ProjectReference Include="..\..\iPlus\gip.core.datamodel\gip.core.datamodel.csproj" Condition="'$(UseProjectReferences)' == 'true'">
       <Name>gip.core.datamodel</Name>
     </ProjectReference>
-    <Reference Include="gip.core.reporthandlerwpf" Condition="'$(UseProjectReferences)' == 'true'">
+    <Reference Include="gip.core.reporthandlerwpf" Condition="'$(UseProjectReferences)' != 'true'">
       <HintPath>$(IPlusIncludeDir)\gip.core.reporthandlerwpf.dll</HintPath>
     </Reference>
     <ProjectReference Include="..\..\iPlus\gip.core.reporthandlerwpf\gip.core.reporthandlerwpf.csproj" Condition="'$(UseProjectReferences)' == 'true'">

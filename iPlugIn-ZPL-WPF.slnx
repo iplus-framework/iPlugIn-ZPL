@@ -1,0 +1,28 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/Local Projects/">
+    <Project Path="zpl.core.reporthandler/zpl.core.reporthandler.csproj" />
+    <Project Path="zpl.core.reporthandlerwpf/zpl.core.reporthandlerwpf.csproj" />
+  </Folder>
+  <Folder Name="/Dependencies - Core/">
+    <Project Path="..\iPlus\gip.core.reporthandler\gip.core.reporthandler.csproj" />
+    <Project Path="..\iPlus\gip.core.reporthandlerwpf\gip.core.reporthandlerwpf.csproj" />
+    <Project Path="..\iPlus\gip.core.autocomponent\gip.core.autocomponent.csproj" />
+    <Project Path="..\iPlus\gip.core.datamodel\gip.core.datamodel.csproj" />
+    <Project Path="..\iPlus\gip.core.ControlScriptSync\gip.core.ControlScriptSync.csproj" />
+    <Project Path="..\iPlus\gip.core.dbsyncer\gip.core.dbsyncer.csproj" />
+    <Project Path="..\iPlus\gip.core.layoutengine\gip.core.layoutengine.csproj" />
+  </Folder>
+  <Folder Name="/Dependencies - Extensions/">
+    <Project Path="..\iPlus\gip.ext.fluent\gip.ext.fluent.csproj" />
+    <Project Path="..\iPlus\gip.ext.chart\gip.ext.chart.csproj" />
+    <Project Path="..\iPlus\gip.ext.designer\project\gip.ext.designer.csproj" />
+    <Project Path="..\iPlus\gip.ext.design\project\gip.ext.design.csproj" />
+    <Project Path="..\iPlus\gip.ext.graphics\gip.ext.graphics.csproj" />
+    <Project Path="..\iPlus\gip.ext.xamldom\project\gip.ext.xamldom.csproj" />
+    <Project Path="..\iPlus\gip.ext.widgets\project\gip.ext.widgets.csproj" />
+  </Folder>
+</Solution>

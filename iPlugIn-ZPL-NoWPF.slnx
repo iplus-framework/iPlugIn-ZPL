@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/Local Projects/">
+    <Project Path="zpl.core.reporthandler/zpl.core.reporthandler.csproj" />
+  </Folder>
+  <Folder Name="/Dependencies/">
+    <Project Path="..\iPlus\gip.core.reporthandler\gip.core.reporthandler.csproj" />
+    <Project Path="..\iPlus\gip.core.autocomponent\gip.core.autocomponent.csproj" />
+    <Project Path="..\iPlus\gip.core.datamodel\gip.core.datamodel.csproj" />
+    <Project Path="..\iPlus\gip.core.ControlScriptSync\gip.core.ControlScriptSync.csproj" />
+    <Project Path="..\iPlus\gip.core.dbsyncer\gip.core.dbsyncer.csproj" />
+  </Folder>
+</Solution>

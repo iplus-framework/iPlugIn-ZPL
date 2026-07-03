@@ -30,6 +30,7 @@ namespace zpl.core.reporthandlerwpf
             _PrintDPI = new ACPropertyConfigValue<short>(this, nameof(PrintDPI), 203);
             _LabelHeight = new ACPropertyConfigValue<int>(this, nameof(LabelHeight), 800);
             _LabelHeightMM = new ACPropertyConfigValue<double>(this, nameof(LabelHeightMM), 0);
+            _PrintConfigWithContent = new ACPropertyConfigValue<bool>(this, nameof(PrintConfigWithContent), false);
         }
 
         public override bool ACInit(Global.ACStartTypes startChildMode = Global.ACStartTypes.Automatic)
@@ -37,6 +38,9 @@ namespace zpl.core.reporthandlerwpf
             bool init = base.ACInit(startChildMode);
             _ = UseScryberLayoutRenderer;
             _ = PrintDPI;
+            _ = LabelHeight;
+            _ = LabelHeightMM;
+            _ = PrintConfigWithContent;
             return init;
         }
 
@@ -88,6 +92,13 @@ namespace zpl.core.reporthandlerwpf
             set => _LabelHeightMM.ValueT = value;
         }
 
+        private ACPropertyConfigValue<bool> _PrintConfigWithContent;
+        [ACPropertyConfig("en{'Print configuration together with print job'}de{'Druckerkonfiguration zusammen mit Druckauftrag drucken'}")]
+        public bool PrintConfigWithContent
+        {
+            get => _PrintConfigWithContent.ValueT;
+            set => _PrintConfigWithContent.ValueT = value;
+        }
         /// <summary>
         /// Calculates effective label height in dots, considering both manual dots setting and millimeter setting
         /// </summary>
@@ -168,7 +179,9 @@ namespace zpl.core.reporthandlerwpf
             {
                 try
                 {
-                    string commands = _shared.BuildCommands(printJob, ResolveEncoding(), PrintDPI, EffectiveLabelHeight);
+                    string commands = _shared.BuildCommands(printJob, ResolveEncoding(), PrintDPI, 
+                                                            EffectiveLabelHeight, 
+                                                            PrintConfigWithContent ? ZPLPrinterConfiguration?.ValueT : null);
 
                     if (string.IsNullOrEmpty(commands))
                     {
@@ -200,7 +213,7 @@ namespace zpl.core.reporthandlerwpf
 
         public override void SendDataBeforePrint(PrintJob printJob)
         {
-            if (ZPLPrinterConfiguration != null)
+            if (ZPLPrinterConfiguration != null && !PrintConfigWithContent)
             {
                 string printerConfiguration = ZPLPrinterConfiguration.ValueT;
                 if (!string.IsNullOrEmpty(printerConfiguration))
