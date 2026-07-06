@@ -177,7 +177,7 @@ namespace zpl.core.reporthandler
                 {
                     string commands = _shared.BuildCommands(printJob, ResolveEncoding(), PrintDPI, 
                                                             EffectiveLabelHeight, 
-                                                            PinterConfigTogetherWithPrintJob ? ZPLPrinterConfiguration?.ValueT : null);
+                                                            PrintConfigWithContent ? ZPLPrinterConfiguration?.ValueT : null);
 
                     if (string.IsNullOrEmpty(commands))
                     {
@@ -208,7 +208,7 @@ namespace zpl.core.reporthandler
 
         public override void SendDataBeforePrint(PrintJob printJob)
         {
-            if (ZPLPrinterConfiguration != null && !PinterConfigTogetherWithPrintJob)
+            if (ZPLPrinterConfiguration != null && !PrintConfigWithContent)
             {
                 string printerConfiguration = ZPLPrinterConfiguration.ValueT;
                 if (!string.IsNullOrEmpty(printerConfiguration))
