@@ -166,8 +166,8 @@ namespace zpl.core.reporthandler
             if (barcodeTypeValue.Equals("QRCODE", StringComparison.OrdinalIgnoreCase))
             {
                 int qrScale = GetIntMetadata(barcodeComponent, 4, "barcode-height", "qr-pixels-per-module", "barcode-width");
-                if (qrScale > 10)
-                    qrScale = 10;
+                if (qrScale > 100)
+                    qrScale = 100;
                 else if (qrScale < 1)
                     qrScale = 1;
 

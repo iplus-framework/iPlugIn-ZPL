@@ -413,8 +413,8 @@ namespace zpl.core.reporthandlerwpf
             if (inlineBarcode.BarcodeType == BarcodeType.QRCODE)
             {
                 int qrCodeHeight = inlineBarcode.BarcodeHeight;
-                if (qrCodeHeight > 10)
-                    qrCodeHeight = 10;
+                if (qrCodeHeight > 100)
+                    qrCodeHeight = 100;
                 else if (qrCodeHeight <= 1)
                     qrCodeHeight = 1;
                 
